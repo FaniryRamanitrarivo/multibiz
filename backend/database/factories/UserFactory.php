@@ -48,14 +48,13 @@ class UserFactory extends Factory
     }
 
     /**
-     * Attach the user to a (new, unless given) organization with the given role.
+     * Put the user in a (new, unless given) organization with the given role.
      */
     public function forOrganization(?Organization $organization = null, Role $role = Role::Owner): static
     {
-        return $this->afterCreating(function (User $user) use ($organization, $role) {
-            $organization ??= Organization::factory()->create();
-
-            $organization->users()->attach($user, ['role' => $role->value]);
-        });
+        return $this->state(fn (array $attributes) => [
+            'organization_id' => $organization ?? Organization::factory(),
+            'role' => $role,
+        ]);
     }
 }

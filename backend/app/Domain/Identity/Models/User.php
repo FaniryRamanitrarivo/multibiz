@@ -4,13 +4,12 @@ namespace App\Domain\Identity\Models;
 
 use App\Domain\Organization\Enums\Role;
 use App\Domain\Organization\Models\Organization;
-use App\Domain\Organization\Models\OrganizationUser;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -23,6 +22,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
+ * @property string|null $organization_id
+ * @property Role|null $role
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -41,32 +42,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
         ];
     }
 
     /**
-     * @return BelongsToMany<Organization, $this, OrganizationUser, 'pivot'>
+     * @return BelongsTo<Organization, $this>
      */
-    public function organizations(): BelongsToMany
+    public function organization(): BelongsTo
     {
-        return $this->belongsToMany(Organization::class, 'organization_user')
-            ->using(OrganizationUser::class)
-            ->withPivot('role')
-            ->withTimestamps();
-    }
-
-    /**
-     * Phase 1 gives every user exactly one organization membership.
-     */
-    public function organization(): Organization
-    {
-        return $this->organizations()->firstOrFail();
+        return $this->belongsTo(Organization::class);
     }
 
     public function roleIn(Organization $organization): ?Role
     {
-        $membership = $this->organizations()->where('organizations.id', $organization->id)->first();
-
-        return $membership?->pivot->role;
+        return $this->organization_id === $organization->id ? $this->role : null;
     }
 }

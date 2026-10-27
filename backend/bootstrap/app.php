@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // GitHub Codespaces' port-forwarding proxy sends Host: localhost:8000
         // and the real https host in X-Forwarded-*; only trust it there.
-        if (env('CODESPACE_NAME')) {
+        if (getenv('CODESPACE_NAME')) {
             $middleware->trustProxies(at: '*');
         }
 

@@ -8,10 +8,10 @@ test('guests are redirected to the login page', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('an authenticated, verified user can reach the dashboard placeholder', function () {
+test('an authenticated, verified user can reach the dashboard', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->get(route('dashboard'));
 
-    $response->assertOk()->assertInertia(fn ($page) => $page->component('coming-soon'));
+    $response->assertOk()->assertInertia(fn ($page) => $page->component('dashboard/index'));
 });
