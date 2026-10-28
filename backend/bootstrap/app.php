@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasNoOrganization;
 use App\Http\Middleware\EnsureUserHasOrganization;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'check-user-organization' => EnsureUserHasOrganization::class,
+            'user-without-organization' => EnsureUserHasNoOrganization::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

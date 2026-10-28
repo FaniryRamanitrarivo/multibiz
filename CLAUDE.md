@@ -93,7 +93,7 @@ Root-level `.gitignore` covers editor/AI-tool directories shared across the mono
   (`spatie/laravel-typescript-transformer`) in `backend/resources/js/types/generated` and
   `packages/shared-types`.
 - UI language is French; default currency is Ariary (MGA), set per organization
-  (`organizations.currency`, also `timezone` and `week_starts_on`). Format amounts like
+  (`organizations.currency`, also `timezone`). Format amounts like
   `1 250 000 Ar` (thin space as thousands separator, real minus sign U+2212 for negatives — see
   `docs/maquette/README.md` for the full number-formatting spec).
 - Inertia.js + React (TypeScript, strict) + Tailwind CSS, living in `backend/resources/js`,
@@ -164,7 +164,7 @@ first) — never directly on the host, see "Run everything inside the containers
 ## Current status
 
 **Domain model** (`app/Domain/*`) is built and tested: `Organization` (UUID PK, `currency`/
-`timezone`/`week_starts_on`) with an `organization_user` pivot carrying a role
+`timezone`) with an `organization_user` pivot carrying a role
 (owner/manager/entry/viewer); `Project` (`model` enum lots/herd/resale/simple, `status`,
 `started_on`, `settings` JSON — per-project verdict thresholds live here), `Batch` ("bande" — a
 cohort for `lots` projects), `Milestone`; `Category` (income/expense/investment,

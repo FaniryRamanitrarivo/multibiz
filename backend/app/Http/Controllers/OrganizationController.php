@@ -2,30 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Domain\Organization\Actions\CreateOrganization;
+use App\Domain\Organization\Data\OrganizationData;
+use App\Domain\Organization\Enums\Currency;
+use App\Http\Requests\OrganizationRequest;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class OrganizationController extends Controller
 {
-    
-    public function create()
+    public function create(): Response
     {
-        return Inertia::render('organization/create');
+        return Inertia::render('organization/create', [
+            'currencies' => Currency::options(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(OrganizationRequest $request, CreateOrganization $createOrganization): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $organization = auth()->user()->organizations()->create([
-            'name' => $request->input('name'),
-        ]);
-
-        auth()->user()->update(['organization_id' => $organization->id]);
+        $createOrganization->handle($request->user(), OrganizationData::from($request->validated()));
 
         return redirect()->route('dashboard');
     }
-
 }

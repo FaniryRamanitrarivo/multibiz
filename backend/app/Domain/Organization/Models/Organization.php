@@ -3,6 +3,7 @@
 namespace App\Domain\Organization\Models;
 
 use App\Domain\Identity\Models\User;
+use App\Domain\Organization\Enums\Currency;
 use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -14,17 +15,26 @@ use Illuminate\Support\Carbon;
 /**
  * @property string $id
  * @property string $name
- * @property string $currency
+ * @property Currency $currency
  * @property string $timezone
- * @property int $week_starts_on
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'currency', 'timezone', 'week_starts_on'])]
+#[Fillable(['name', 'currency', 'timezone'])]
 class Organization extends Model
 {
     /** @use HasFactory<OrganizationFactory> */
     use HasFactory, HasUuids;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'currency' => Currency::class,
+        ];
+    }
 
     /**
      * @return HasMany<User, $this>

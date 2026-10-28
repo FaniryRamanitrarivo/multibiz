@@ -15,10 +15,10 @@ class EnsureUserHasOrganization
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!auth()->user()->organization_id) {
+        if (! auth()->user()->organization_id) {
             return redirect()->route('organization.create');
         }
-        
+
         return $next($request);
     }
 }

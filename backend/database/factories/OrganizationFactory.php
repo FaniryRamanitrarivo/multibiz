@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domain\Organization\Enums\Currency;
 use App\Domain\Organization\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,9 +20,8 @@ class OrganizationFactory extends Factory
     {
         return [
             'name' => fake()->company(),
-            'currency' => 'MGA',
+            'currency' => Currency::MGA,
             'timezone' => 'Indian/Antananarivo',
-            'week_starts_on' => 1,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Domain\Organization\Enums\Currency;
 use InvalidArgumentException;
 use JsonSerializable;
 
@@ -11,19 +12,6 @@ use JsonSerializable;
  */
 final readonly class Money implements JsonSerializable
 {
-    /**
-     * Number of minor-unit digits per currency. MGA (Ariary) has no everyday
-     * subdivision, so its minor unit is 1 Ariary.
-     *
-     * @var array<string, int>
-     */
-    private const MINOR_UNIT_EXPONENTS = [
-        'MGA' => 0,
-        'XOF' => 0,
-        'EUR' => 2,
-        'USD' => 2,
-    ];
-
     public function __construct(
         public int $amount,
         public string $currency = 'MGA',
@@ -77,9 +65,13 @@ final readonly class Money implements JsonSerializable
         return $other->amount;
     }
 
+    /**
+     * Number of minor-unit digits, from the `Currency` enum. An unsupported code
+     * throws (`ValueError`) rather than guessing a number of decimals.
+     */
     private static function exponent(string $currency): int
     {
-        return self::MINOR_UNIT_EXPONENTS[$currency] ?? 2;
+        return Currency::from($currency)->exponent();
     }
 
     /**
