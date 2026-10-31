@@ -163,39 +163,60 @@ first) — never directly on the host, see "Run everything inside the containers
 
 ## Current status
 
-**Domain model** (`app/Domain/*`) is built and tested: `Organization` (UUID PK, `currency`/
-`timezone`) with an `organization_user` pivot carrying a role
-(owner/manager/entry/viewer); `Project` (`model` enum lots/herd/resale/simple, `status`,
-`started_on`, `settings` JSON — per-project verdict thresholds live here), `Batch` ("bande" — a
-cohort for `lots` projects), `Milestone`; `Category` (income/expense/investment,
-archive/unarchive, no hard delete) and the append-only `Entry` registry (rule 4 above) with
-`ReverseEntry` for corrections; `Analytics\Services\{ProjectResult,ProjectVerdict,BatchStats,
-HerdStats,PocketSummary,DashboardStats}` computing everything on read, nothing stored. All of this
-is covered by Pest tests (`tests/Feature/{Organization,Project,Finance,Analytics}`), including
-cross-organization Policy denial and role-based access (e.g. `entry` role denied Ma poche/
-analytics).
+The repo was reset to a bare skeleton on 2026-10-24 (Identity + Organization + Fortify auth only)
+and is being rebuilt feature by feature — most of what a mature MultiBiz needs (Finance,
+Analytics, Sync, and everything in `docs/audit-architecture.md`'s model beyond `Project` itself)
+does not exist yet. Check this section (and the git log) before assuming any feature described
+elsewhere in this file is actually present.
+
+**Domain model** (`app/Domain/*`): `Identity` (`User` — bigint id, Fortify/Sanctum, not UUID/
+Syncable) and `Organization` (`Organization` UUID PK with `currency`/`timezone`,
+`OrganizationPolicy::accessPocket`) are built and tested. `Project` now exists too: `Project`
+(UUID PK) with `project_template` (enum `lots`/`herd`/`resale`/`simple`, each with a
+`ProjectTemplateData` definition — description, examples, advantages, default modules, tabs),
+`status`, `graph_color` (`ProjectColor`, one of 6, reserved per organization once chosen),
+`started_on`, `seed_budget`, `goal_type`/`goal_target`/`goal_due_on` (`ProjectGoalType`; `target`
+is minor-units money for the monetary goal types, a plain number otherwise), `modules`
+(`ProjectModule` catalog — `lots`/`animals`/`weight`/`sales`/`stock`) and a `settings` JSON column
+reserved for later per-project verdict thresholds (unused so far). `ProjectPolicy::create` gates
+project creation to the owner/manager roles. **`Finance`, `Analytics`, `Sync` domains and the
+`Batch`/`Milestone`/`Category`/`Entry`/`Attachment` models still don't exist** — rule 4's
+`AppendOnly` trait and anything computed from entries (result, verdict, capital recovered, Ma
+poche) come with them. Covered by Pest tests under `tests/Feature/{Auth,Organization,Project}`,
+including cross-organization Policy denial and role-based access.
+
+**Known architecture gap vs. rule 2 above:** every web controller currently lives flat in
+`app/Http/Controllers` (`DashboardController`, `OrganizationController`, `ProjectController`), not
+under `app/Http/Web/Controllers`, and `routes/api.php` is empty (no `app/Http/Api/Controllers/V1`
+either). Follow this existing flat convention for new web controllers rather than inventing a
+`Web/` subfolder for a single controller — doing the real Web/Api split is its own task.
 
 **Not built yet / known gaps:**
-- `Attachment` (receipt photo on an entry): model + migration exist, but no controller, route, or
-  upload UI — not usable today.
-- No backend route for a dedicated batches list/detail page or a project-settings page (verdict
-  threshold editor) — `BatchController` only has `store`/`close`, no `index`/`show`.
-- The mobile sync protocol (`SyncRegistry`, `/api/sync/push`, `/api/sync/pull`) — see "Sync
-  foundations" above, Phase 5.
-- `DashboardStats` takes a period range as a parameter but the web controller/page don't yet
-  expose a period picker (Depuis le début/6 mois/30 jours) — always whatever the controller
-  hardcodes.
+- No project show/detail page (`/projects/{project}`), batches list, project settings, history,
+  pocket, analysis, or tasks screens — only organization onboarding, the dashboard placeholder,
+  and the project-creation wizard exist so far. `docs/maquette/README.md` §4 (the screens → routes
+  table) is the authoritative checklist of what Phase-1 screens remain.
+- The project-creation wizard deliberately skips two things from `docs/maquette/README.md` §5's
+  "Nouveau projet" spec because they have no persistence target yet: step 2's "unit" question
+  (e.g. "Bande"/"Lot"/"Cycle" for the `lots` template — depends on how `Batch` ends up modeled)
+  and the optional note that's meant to become the project's first `Milestone`. Revisit both once
+  those domains exist, rather than inventing a settings-JSON stand-in now.
+- No draft-autosave (localStorage) on the project wizard, unlike the maquette's "brouillon
+  enregistré" indicator — a progressive enhancement, not required for creation to work.
+- The mobile sync protocol (`SyncRegistry`, `/api/sync/push`, `/api/sync/pull`) and the
+  `app/Http/Api/Controllers/V1` skeleton mentioned in "Sync foundations" above — not rebuilt yet.
 
-**Frontend** (`backend/resources/js`) is mid-rebuild against `docs/maquette/`: the design system
-(tokens, Geist fonts, component library — `stat-tile`, `segmented-control`, `verdict-badge`,
-custom SVG charts, etc. — see `docs/maquette/README.md` §3) is in place, with a local-only
-`/_dev/ui` page demoing every component in light/dark. Pages built: login/register,
-`/projects/create` (3-step wizard), `/dashboard`, `/history` (filterable), `/pocket`,
-`/projects/{project}` (model-aware, but not yet the full tabbed layout the maquette specifies).
-`docs/maquette/README.md` §4 (the screens → routes table) is the authoritative checklist for what
-Phase-1 screens remain — currently missing: project settings, a dedicated batches page, and the
-dashboard's period picker/per-project trajectory sparkline. `/analysis` and `/tasks` are
-deliberate `coming-soon` placeholders (Phase 3, per the maquette).
+**Frontend** (`backend/resources/js`): the design system (tokens, Geist fonts, component library —
+`choice-card`, `switch`, `project-avatar`, `progress-bar`, custom SVG charts, etc. — see
+`docs/maquette/README.md` §3) is in place, with a local-only `/_dev/ui` page demoing every
+component in light/dark. Pages built: `auth/*` (login/register/password reset/email verify,
+`AuthLayout`), `organization/create` (onboarding), `dashboard/index` (placeholder), and
+`projects/create` (the 3-step wizard from `docs/maquette/README.md` §5, its own `WizardLayout`
+registered in `app.tsx` and driven by `setLayoutProps` for the per-step title/breadcrumbs).
+Everything else in the maquette's §4 routes table is still a gap.
 
-Registering creates an `Organization` + membership in one step —
-`App\Domain\Identity\Actions\RegisterOrganizationAndUser`, wired into Fortify's `CreateNewUser`.
+Registering only creates a bare `User` (Fortify's `CreateNewUser`) — creating the `Organization`
+is a separate onboarding step once logged in (`EnsureUserHasNoOrganization`/
+`EnsureUserHasOrganization` middleware, `App\Domain\Organization\Actions\CreateOrganization`),
+and creating a `Project` is a further step once the user has an organization
+(`App\Domain\Project\Actions\CreateProject`, gated by `ProjectPolicy`).

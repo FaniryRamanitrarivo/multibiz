@@ -4,17 +4,20 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import AuthLayout from '@/layouts/auth-layout';
 import AppLayout from '@/layouts/app-layout';
+import WizardLayout from '@/layouts/wizard-layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    // Only auth/ pages have a layout so far — add the others back
-    // (AppLayout, WizardLayout, SettingsLayout) as those pages are rebuilt.
+    // Only auth/ pages and the project wizard have a layout so far — add the
+    // others back (AppLayout, SettingsLayout) as those pages are rebuilt.
     layout: (name) => {
         switch (true) {
             case name.startsWith('auth/'):
                 return AuthLayout;
+            case name === 'projects/create':
+                return WizardLayout;
             case name.startsWith('dev/'):
                 return null;
             default:

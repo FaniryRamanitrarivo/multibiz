@@ -4,6 +4,7 @@ namespace App\Domain\Organization\Models;
 
 use App\Domain\Identity\Models\User;
 use App\Domain\Organization\Enums\Currency;
+use App\Domain\Project\Models\Project;
 use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -42,5 +43,13 @@ class Organization extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    /**
+     * @return HasMany<Project, $this>
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 }

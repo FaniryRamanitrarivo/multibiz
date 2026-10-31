@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->to(auth()->check() ? route('dashboard') : route('login')))
@@ -14,6 +15,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('check-user-organization')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('/projects/create', [ProjectController::class, 'create'])
+            ->name('projects.create');
+
+        Route::post('/projects', [ProjectController::class, 'store'])
+            ->name('projects.store');
     });
 
     // Onboarding: only for users who don't have an organization yet.
