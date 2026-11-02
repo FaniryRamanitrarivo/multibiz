@@ -22,7 +22,7 @@ class ProjectController extends Controller
         Gate::authorize('create', Project::class);
 
         $user = auth()->user();
-
+        
         $takenColors = Project::where('organization_id', $user->organization_id)
             ->get()
             ->map(fn (Project $project) => $project->graph_color->value)
@@ -40,6 +40,7 @@ class ProjectController extends Controller
 
     public function store(ProjectRequest $request, CreateProject $createProject): RedirectResponse
     {
+        dd($request->validated());
         $createProject->handle($request->user(), ProjectData::from($request->validated()));
 
         return redirect()->route('dashboard');
