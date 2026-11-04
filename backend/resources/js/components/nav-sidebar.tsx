@@ -60,9 +60,6 @@ function NavSidebar({
             </Link>
 
             <div className="flex flex-col gap-0.5">
-                <span className="num px-3 pb-1.5 text-[11.5px] text-muted">
-                    // piloter
-                </span>
                 {navItems.map((item) => (
                     <Link
                         key={item.label}

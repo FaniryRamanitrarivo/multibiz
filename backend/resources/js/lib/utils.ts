@@ -52,3 +52,38 @@ export function goalUnitLabel(goalType: string, currency: string): string {
             return 'unités';
     }
 }
+
+export function setLocalStorage<T>(key: string, value: T): void {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function getLocalStorage<T>(key: string, defaultValue: T | null = null): T | null {
+    const item = localStorage.getItem(key);
+
+    if (item === null) return defaultValue;
+
+    try {
+        return JSON.parse(item) as T;
+    } catch {
+        return defaultValue;
+    }
+}
+
+export function saveFormState<T>(key: string, data: T): void {
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+export function restoreFormState<T>(key: string, defaultData: T): T {
+    const savedData = localStorage.getItem(key);
+
+    if(!savedData) return defaultData;
+
+    try {
+        return {
+            ...defaultData,
+            ...JSON.parse(savedData)
+        };
+    } catch {
+        return defaultData;
+    }
+}

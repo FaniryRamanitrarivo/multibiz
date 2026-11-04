@@ -40,7 +40,6 @@ class ProjectController extends Controller
 
     public function store(ProjectRequest $request, CreateProject $createProject): RedirectResponse
     {
-        dd($request->validated());
         $createProject->handle($request->user(), ProjectData::from($request->validated()));
 
         return redirect()->route('dashboard');

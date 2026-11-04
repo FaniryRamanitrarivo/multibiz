@@ -5,14 +5,17 @@ services:
             dockerfile: docker/php/Dockerfile
         ports:
             - '${APP_PORT:-8000}:8000'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         environment:
             CODESPACE_NAME: '${CODESPACE_NAME:-}'
             GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: '${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}'
-            DB_HOST: pgsql
-            DB_PORT: 5432
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-            MAIL_HOST: mailpit
+            DB_HOST: host.docker.internal
+            DB_PORT: '${FORWARD_DB_PORT:-5432}'
+            REDIS_HOST: host.docker.internal
+            REDIS_PORT: '${FORWARD_REDIS_PORT:-6379}'
+            MAIL_HOST: host.docker.internal
+            MAIL_PORT: '${FORWARD_MAILPIT_PORT:-1025}'
         volumes:
             - '.:/var/www/html'
             - 'multibiz-vendor:/var/www/html/vendor'
@@ -32,14 +35,17 @@ services:
         build:
             context: .
             dockerfile: docker/php/Dockerfile
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         environment:
             CODESPACE_NAME: '${CODESPACE_NAME:-}'
             GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: '${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}'
-            DB_HOST: pgsql
-            DB_PORT: 5432
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-            MAIL_HOST: mailpit
+            DB_HOST: host.docker.internal
+            DB_PORT: '${FORWARD_DB_PORT:-5432}'
+            REDIS_HOST: host.docker.internal
+            REDIS_PORT: '${FORWARD_REDIS_PORT:-6379}'
+            MAIL_HOST: host.docker.internal
+            MAIL_PORT: '${FORWARD_MAILPIT_PORT:-1025}'
         volumes:
             - '.:/var/www/html'
             - 'multibiz-vendor:/var/www/html/vendor'
@@ -64,13 +70,15 @@ services:
             dockerfile: docker/php/Dockerfile
         ports:
             - '5173:5173'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         environment:
             CODESPACE_NAME: '${CODESPACE_NAME:-}'
             GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: '${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}'
-            DB_HOST: pgsql
-            DB_PORT: 5432
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
+            DB_HOST: host.docker.internal
+            DB_PORT: '${FORWARD_DB_PORT:-5432}'
+            REDIS_HOST: host.docker.internal
+            REDIS_PORT: '${FORWARD_REDIS_PORT:-6379}'
         volumes:
             - '.:/var/www/html'
             - 'multibiz-vendor:/var/www/html/vendor'
@@ -102,6 +110,8 @@ services:
                 - CMD
                 - pg_isready
                 - '-q'
+                - '-h'
+                - 127.0.0.1
                 - '-d'
                 - '${DB_DATABASE}'
                 - '-U'

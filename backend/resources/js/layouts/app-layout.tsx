@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Head } from "@inertiajs/react";
 import { BarChart3, CheckSquare, History, LayoutGrid, Settings, Wallet } from "lucide-react";
 import { ReactNode } from "react";
-
+import project from '@/routes/projects';
 
 const NAV_ITEMS: NavItem[] = [
     { label: "Vue d'ensemble", href: '#', icon: LayoutGrid, current: true },
@@ -68,7 +68,7 @@ export default function AppLayout({
                     <NavSidebar
                         navItems={NAV_ITEMS}
                         projects={demoProjects}
-                        newProjectHref="#"
+                        newProjectHref={project.create().url}
                         activeTimer={{
                             projectName: 'Poulets de chair',
                             elapsedLabel: '00:42:10',

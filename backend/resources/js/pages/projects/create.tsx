@@ -1,6 +1,6 @@
 import { setLayoutProps, useForm } from '@inertiajs/react';
 import { Bird, Boxes, ShoppingBag, Wallet } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import type { WizardStep } from '@/layouts/wizard-layout';
 import { store } from '@/routes/projects';
@@ -10,18 +10,8 @@ import { IdentityStep } from '@/components/projects/create/identity-step';
 import { GoalStep } from '@/components/projects/create/goal-step';
 import { WizardNavigation } from '@/components/projects/create/navigation';
 import { ProjectPreview } from '@/components/projects/create/project-preview';
-/*
-import { GoalStep } from './goal-step';
-import { IdentityStep } from './identity-step';
-import { ModelStep } from './model-step';
-import { WizardNavigation } from './navigation';
-import { ProjectPreview } from './project-preview';
-import type {
-    CreateProjectProps,
-    ProjectFormData,
-    TemplateIconMap,
-} from './types';
-*/
+import { restoreFormState, saveFormState } from '@/lib/utils';
+
 const TEMPLATE_ICONS: TemplateIconMap = {
     lots: Boxes,
     herd: Bird,
@@ -53,22 +43,32 @@ export default function CreateProjectPage({
     modules,
     currency,
 }: CreateProjectProps) {
+
+    const STORAGE_KEY = 'project_form';
     const [step, setStep] = useState(1);
     const firstFreeColor =
         colors.find((color) => !takenColors.includes(color.value)) ?? colors[0];
 
+    const initialData: ProjectFormData = {
+        name: '',
+        project_template: templates[0]?.value ?? '',
+        graph_color: firstFreeColor?.value ?? '',
+        started_on: new Date().toISOString().slice(0, 10),
+        seed_budget: '',
+        goal_type: goalTypes[0]?.value ?? '',
+        goal_target: '',
+        goal_due_on: '',
+        modules: templates[0]?.defaultModules ?? [],
+    };
+
     const { data, setData, post, errors, processing } =
-        useForm<ProjectFormData>({
-            name: '',
-            project_template: templates[0]?.value ?? '',
-            graph_color: firstFreeColor?.value ?? '',
-            started_on: new Date().toISOString().slice(0, 10),
-            seed_budget: '',
-            goal_type: goalTypes[0]?.value ?? '',
-            goal_target: '',
-            goal_due_on: '',
-            modules: templates[0]?.defaultModules ?? [],
-        });
+        useForm<ProjectFormData>(
+            restoreFormState(STORAGE_KEY, initialData)
+        );
+
+    useEffect(() => {
+        saveFormState(STORAGE_KEY, data);
+    }, [data]);
 
     const template =
         templates.find((item) => item.value === data.project_template) ??
