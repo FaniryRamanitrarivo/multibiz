@@ -63,11 +63,11 @@ export default function AppLayout({
         <>
             <Head title={headTitle} />
             
-            <Section title={mainTitle}>
+            
+            <section className="flex flex-col gap-3">   
                 <div className="flex gap-4 overflow-hidden rounded-2xl border border-border shadow-[var(--shadow)]">
                     <NavSidebar
                         navItems={NAV_ITEMS}
-                        projects={demoProjects}
                         newProjectHref={project.create().url}
                         activeTimer={{
                             projectName: 'Poulets de chair',
@@ -94,7 +94,7 @@ export default function AppLayout({
                         </div>
                     </div>
                 </div>
-            </Section>
+            </section>
         </>
     );
 

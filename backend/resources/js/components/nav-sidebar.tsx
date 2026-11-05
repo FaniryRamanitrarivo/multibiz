@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Plus, Square, type LucideIcon } from 'lucide-react';
 
 import { ProjectDot } from '@/components/ui/project-avatar';
@@ -26,19 +26,28 @@ export type ActiveTimer = {
     onStop: () => void;
 };
 
+
 function NavSidebar({
     navItems,
-    projects,
     newProjectHref,
     activeTimer,
     className,
 }: {
     navItems: NavItem[];
-    projects: ProjectNavItem[];
     newProjectHref: string;
     activeTimer?: ActiveTimer;
     className?: string;
 }) {
+
+    const { projects } = usePage<ProjectNavItem>().props;  
+    const formatedProjects = projects.map(p => ({
+        name: p.name,
+        href: '#',
+        color: `var(--${p.graph_color})`,
+        recoveredLabel: '0 %',
+        recoveredColor: 'var(--primary-text)',
+    }));
+    console.log('projects', projects)
     return (
         <nav
             aria-label="Navigation principale"
@@ -94,7 +103,7 @@ function NavSidebar({
                         <Plus className="size-3" strokeWidth={2.4} />
                     </Link>
                 </div>
-                {projects.map((project) => (
+                {formatedProjects.map((project) => (
                     <Link
                         key={project.name}
                         href={project.href}
