@@ -13,7 +13,22 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
 
 const THIN_SPACE = ' ';
 
-export function formatAmount(amount: number, currency: string): string {
+export function formatAmount(
+    amount: number,
+    currency: string,
+    decimalPlaces = 0,
+): string {
+    if (decimalPlaces > 0) {
+        const formatted = new Intl.NumberFormat('fr-FR', {
+            minimumFractionDigits: decimalPlaces,
+            maximumFractionDigits: decimalPlaces,
+        }).format(Math.abs(amount));
+
+        return currency === 'MGA'
+            ? `${formatted}${THIN_SPACE}Ar`
+            : `${formatted}${THIN_SPACE}${currency}`;
+    }
+
     const grouped = Math.round(Math.abs(amount))
         .toString()
         .replace(/\B(?=(\d{3})+(?!\d))/g, THIN_SPACE);

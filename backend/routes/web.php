@@ -21,6 +21,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::post('/projects', [ProjectController::class, 'store'])
             ->name('projects.store');
+
+        Route::get('/projects/{project}', [ProjectController::class, 'show'])
+            ->name('projects.show');
     });
 
     // Onboarding: only for users who don't have an organization yet.

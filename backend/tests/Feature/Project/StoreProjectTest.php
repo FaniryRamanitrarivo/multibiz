@@ -30,9 +30,8 @@ test('creating a project stores it under the owner\'s organization', function ()
 
     $response = $this->actingAs($user)->post(route('projects.store'), validProjectInput());
 
-    $response->assertRedirect(route('dashboard'));
-
     $project = Project::sole();
+    $response->assertRedirect(route('projects.show', $project));
 
     expect($project->organization_id)->toBe($user->organization_id)
         ->and($project->created_by)->toBe($user->id)
@@ -54,7 +53,7 @@ test('the seed budget and a monetary goal target are converted using the organiz
     $this->actingAs($user)->post(route('projects.store'), validProjectInput([
         'seed_budget' => 150.50,
         'goal_target' => 1000,
-    ]))->assertRedirect(route('dashboard'));
+    ]))->assertRedirect(route('projects.show', Project::sole()));
 
     $project = Project::sole();
 
@@ -68,7 +67,7 @@ test('a non-monetary goal target (e.g. a loss percentage) is stored as a plain n
     $this->actingAs($user)->post(route('projects.store'), validProjectInput([
         'goal_type' => ProjectGoalType::LOSS_LIMIT->value,
         'goal_target' => 5,
-    ]))->assertRedirect(route('dashboard'));
+    ]))->assertRedirect(route('projects.show', Project::sole()));
 
     expect(Project::sole()->goal_target)->toBe(5);
 });
@@ -90,7 +89,7 @@ test('the same color can be used by different organizations', function () {
 
     $this->actingAs($user)
         ->post(route('projects.store'), validProjectInput(['graph_color' => ProjectColor::B1->value]))
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('projects.show', Project::sole()));
 
     expect(Project::count())->toBe(2);
 });
